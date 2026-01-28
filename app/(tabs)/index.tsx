@@ -1,98 +1,121 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const { width } = Dimensions.get('window');
 
-export default function HomeScreen() {
+const FeaturedCard = () => (
+  <View style={styles.card}>
+    <Image source={{ uri: 'https://images.unsplash.com/photo-1548191265-cc70d3d45ba1' }} style={styles.cardImage} />
+    <View style={styles.cardContent}>
+      <View style={styles.tag}><Text style={styles.tagText}>Animals & Rescue</Text></View>
+      <Text style={styles.cardTitle}>Vet Bills for Mayari Rescue Center Injured Animals</Text>
+      <View style={styles.progressLabel}>
+        <Text style={styles.progressText}>₱6480 of ₱16000 raised</Text>
+        <Text style={styles.progressText}>40%</Text>
+      </View>
+      <View style={styles.progressBar}><View style={[styles.progressFill, { width: '40%' }]} /></View>
+      <View style={styles.cardFooter}>
+        <Text style={styles.readMore}>Read More</Text>
+        <TouchableOpacity style={styles.donateBtn}><Text style={styles.donateBtnText}>Donate</Text></TouchableOpacity>
+      </View>
+    </View>
+  </View>
+);
+
+export default function Home() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.mainWrapper}>
+      <View style={styles.topNav}><Text style={styles.topNavTitle}>Fundr</Text></View>
+      
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Hello User!</Text>
+          <Text style={styles.subGreeting}>Every contribution counts, start changing lives with fundr!</Text>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>FEATURED GOALS</Text>
+          <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={width * 0.8 + 20} decelerationRate="fast" contentContainerStyle={{ paddingHorizontal: 20 }}>
+          <FeaturedCard />
+          <FeaturedCard />
+        </ScrollView>
+
+        <View style={styles.banner}>
+          <Ionicons name="heart-circle" size={40} color="#81ecec" />
+          <View style={{ marginLeft: 10 }}>
+            <Text style={styles.bannerTitle}>Support a cause today</Text>
+            <Text style={styles.bannerSub}>Make a difference for people who need it most</Text>
+          </View>
+        </View>
+
+        <View style={styles.exploreBar}>
+           <Text style={styles.sectionTitle}>NOT SURE WHERE TO HELP?</Text>
+           <TouchableOpacity style={styles.miniExplore}><Text>Explore</Text></TouchableOpacity>
+        </View>
+
+        <View style={styles.largeCard}>
+          <Image source={{ uri: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c' }} style={styles.largeCardImg} />
+          <View style={styles.largeCardOverlay}>
+            <Text style={styles.largeCardTitle}>Support Families and Communities in Need</Text>
+            <TouchableOpacity style={styles.largeDonate}><Text style={styles.donateBtnText}>Donate</Text></TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.inviteCard}>
+          <Ionicons name="people" size={50} color="#333" />
+          <View style={{ flex: 1, marginLeft: 15 }}>
+            <Text style={styles.bannerTitle}>Invite your friends</Text>
+            <Text style={styles.bannerSub}>Help more people by sharing Fundr</Text>
+            <TouchableOpacity style={styles.inviteBtn}><Text>Invite Friends</Text></TouchableOpacity>
+          </View>
+        </View>
+
+        {/* BOTTOM PADDING SO CONTENT ISN'T BEHIND TAB BAR */}
+        <View style={{ height: 120 }} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  mainWrapper: { flex: 1, backgroundColor: '#FFF' },
+  topNav: { backgroundColor: '#1A2138', height: 100, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
+  topNavTitle: { color: 'white', fontSize: 20, fontWeight: 'bold' },
+  header: { backgroundColor: '#F9F1D0', padding: 25 },
+  greeting: { fontSize: 28, fontWeight: 'bold' },
+  subGreeting: { fontSize: 14, color: '#666', marginTop: 5 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', margin: 20 },
+  sectionTitle: { fontSize: 14, fontWeight: 'bold' },
+  badge: { backgroundColor: '#1A2138', borderRadius: 10, width: 20, height: 20, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
+  badgeText: { color: 'white', fontSize: 12 },
+  card: { width: width * 0.8, marginRight: 20, borderRadius: 20, backgroundColor: 'white', borderWidth: 1, borderColor: '#eee', overflow: 'hidden' },
+  cardImage: { width: '100%', height: 180 },
+  cardContent: { padding: 15 },
+  tag: { backgroundColor: '#1A2138', alignSelf: 'flex-start', padding: 4, borderRadius: 5, marginBottom: 10 },
+  tagText: { color: 'white', fontSize: 10 },
+  cardTitle: { fontWeight: 'bold', fontSize: 15, marginBottom: 10 },
+  progressLabel: { flexDirection: 'row', justifyContent: 'space-between' },
+  progressText: { fontSize: 12, color: '#888' },
+  progressBar: { height: 6, backgroundColor: '#eee', borderRadius: 3, marginVertical: 10 },
+  progressFill: { height: '100%', backgroundColor: '#FF9F43', borderRadius: 3 },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  readMore: { fontSize: 12, color: '#888', textDecorationLine: 'underline' },
+  donateBtn: { backgroundColor: '#FF9F43', paddingHorizontal: 20, paddingVertical: 8, borderRadius: 10 },
+  donateBtnText: { color: 'white', fontWeight: 'bold' },
+  banner: { margin: 20, backgroundColor: '#DFF9FB', borderRadius: 15, padding: 15, flexDirection: 'row', alignItems: 'center' },
+  bannerTitle: { fontWeight: 'bold', fontSize: 16 },
+  bannerSub: { fontSize: 12, color: '#666' },
+  exploreBar: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, alignItems: 'center' },
+  miniExplore: { borderWidth: 1, borderColor: '#81ecec', padding: 5, borderRadius: 8 },
+  largeCard: { margin: 20, height: 300, borderRadius: 20, overflow: 'hidden' },
+  largeCardImg: { width: '100%', height: '100%' },
+  largeCardOverlay: { position: 'absolute', bottom: 0, width: '100%', padding: 20, backgroundColor: 'rgba(0,0,0,0.3)' },
+  largeCardTitle: { color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  largeDonate: { backgroundColor: '#FF9F43', padding: 15, borderRadius: 15, alignItems: 'center' },
+  inviteCard: { margin: 20, backgroundColor: '#DFF9FB', borderRadius: 15, padding: 20, flexDirection: 'row' },
+  inviteBtn: { backgroundColor: 'white', borderWidth: 1, borderColor: '#81ecec', padding: 8, borderRadius: 10, marginTop: 10, width: 120, alignItems: 'center' }
 });
