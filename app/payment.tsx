@@ -9,7 +9,7 @@ const PAYMENT_METHODS = [
   { id: 'card', name: 'Credit/Debit Card', icon: 'card', color: '#1A2138', provider: 'Ionicons' },
   { id: 'bank', name: 'Bank Transfer', icon: 'business', color: '#FF9F43', provider: 'Ionicons' },
 ];
-
+/** */
 export default function PaymentScreen() {
   const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState('gcash');

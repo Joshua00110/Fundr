@@ -111,7 +111,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   mainWrapper: { flex: 1, backgroundColor: '#FFF' },
   topNav: { backgroundColor: '#1A2138', height: 100, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
-  topNavTitle: { color: 'white', fontSize: 30, fontWeight: 'bold' },
+  topNavTitle: { color: 'white', fontSize: 28, fontWeight: 'bold' },
   header: { backgroundColor: '#F9F1D0', padding: 25 },
   greeting: { fontSize: 28, fontWeight: 'bold' },
   subGreeting: { fontSize: 14, color: '#666', marginTop: 5 },
