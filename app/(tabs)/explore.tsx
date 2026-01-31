@@ -1,96 +1,137 @@
-import React from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, Dimensions, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router'; // Added useRouter
 
 const { width } = Dimensions.get('window');
 
-// Reusable swipeable card component
-const CampaignCard = ({ title, raised, goal, percent, image, tag }) => (
-  <View style={styles.card}>
-    <Image source={{ uri: image }} style={styles.cardImage} />
-    <View style={styles.cardContent}>
-      <View style={styles.tag}><Text style={styles.tagText}>{tag}</Text></View>
-      <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
-      <View style={styles.progressLabel}>
-        <Text style={styles.progressText}>₱{raised} of ₱{goal} raised</Text>
-        <Text style={styles.progressText}>{percent}%</Text>
-      </View>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${percent}%` }]} />
-      </View>
-      <View style={styles.cardFooter}>
-        <TouchableOpacity><Text style={styles.readMoreText}>Read More</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.donateBtn}><Text style={styles.donateBtnText}>Donate</Text></TouchableOpacity>
-      </View>
-    </View>
-  </View>
-);
+const CAMPAIGNS = [
+  {
+    id: '1',
+    category: 'Health',
+    title: 'Medical Aid for PWDs of Barangay Kalayaan',
+    raised: 6900,
+    goal: 18000,
+    percent: 38,
+    image: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8',
+    urgent: true,
+  },
+  {
+    id: '2',
+    category: 'Emergency',
+    title: 'Relief Goods for Typhoon Victims',
+    raised: 12400,
+    goal: 50000,
+    percent: 24,
+    image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c',
+    urgent: false,
+  }
+];
+
+const CATEGORIES = ['All', 'Emergency', 'Health', 'Children', 'Education'];
 
 export default function ExploreScreen() {
-  const categories = ['All', 'Emergency', 'Health', 'Children', 'Environment'];
+  const [activeTab, setActiveTab] = useState('All');
+  const router = useRouter(); // Initialize Router
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.topNav}>
-        <Text style={styles.topNavTitle}>Fundr</Text>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
+        
         <View style={styles.headerSection}>
-          <Text style={styles.mainTitle}>Choose where to donate</Text>
-          <Text style={styles.subTitle}>Fundr connects you to verified donation drives that need your help.</Text>
+          <Text style={styles.mainHeading}>Choose where to donate</Text>
+          <Text style={styles.subHeading}>
+            Fundr connects you to verified donation drives that need your help.
+          </Text>
         </View>
 
-        {/* Horizontal Category Selector */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryBar}>
-          {categories.map((cat, index) => (
-            <TouchableOpacity key={index} style={[styles.catBtn, index === 0 && styles.catBtnActive]}>
-              <Text style={[styles.catText, index === 0 && styles.catTextActive]}>{cat}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={styles.categoryScrollWrapper}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.categoryContent}
+          >
+            {CATEGORIES.map((cat) => (
+              <Link 
+                key={cat} 
+                href={`/explore/${cat.toLowerCase()}` as any} 
+                asChild
+              >
+                <TouchableOpacity 
+                  onPress={() => setActiveTab(cat)}
+                  style={StyleSheet.flatten([
+                    styles.categoryPill, 
+                    activeTab === cat && styles.categoryPillActive
+                  ])}
+                >
+                  <Text style={StyleSheet.flatten([
+                    styles.categoryLabel, 
+                    activeTab === cat && styles.categoryLabelActive
+                  ])}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              </Link>
+            ))}
+          </ScrollView>
+        </View>
 
-        {/* Section 1: Ongoing Fundraising Campaigns */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>ONGOING FUNDRAISING CAMPAIGNS</Text>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>ONGOING FUNDRAISING CAMPAIGNS</Text>
           <View style={styles.countBadge}><Text style={styles.countText}>4</Text></View>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={width * 0.75 + 20} decelerationRate="fast" contentContainerStyle={styles.horizontalScroll}>
-          <CampaignCard 
-            tag="Health" 
-            title="Medical Aid for PWDs of Barangay Kalayaan" 
-            raised="6900" goal="18000" percent="38" 
-            image="https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8" 
-          />
-          <CampaignCard 
-            tag="Emergency" 
-            title="Fire Relief Funds for Manila Area" 
-            raised="4500" goal="10000" percent="45" 
-            image="https://images.unsplash.com/photo-1542831371-29b0f74f9713" 
-          />
-        </ScrollView>
+        <Text style={styles.sectionSubtitle}>Donation drives that need continuous community support.</Text>
 
-        {/* Section 2: Needs Some Love */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>NEEDS SOME LOVE</Text>
+        <FlatList
+          horizontal
+          data={CAMPAIGNS}
+          keyExtractor={(item) => item.id}
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={width * 0.8 + 20}
+          decelerationRate="fast"
+          contentContainerStyle={styles.cardList}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.imageWrapper}>
+                <Image source={{ uri: item.image }} style={styles.cardImage} />
+                {item.urgent && (
+                  <View style={styles.urgentBadge}><Text style={styles.urgentText}>Urgent</Text></View>
+                )}
+                <View style={styles.imageOverlayText}>
+                  <Text style={styles.overlayTitle}>{item.title}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.cardInfo}>
+                <View style={styles.categoryBadge}><Text style={styles.badgeText}>{item.category}</Text></View>
+                <View style={styles.progressRow}>
+                  <Text style={styles.progressText}>₱{item.raised} of ₱{item.goal} raised</Text>
+                  <Text style={styles.percentText}>{item.percent}%</Text>
+                </View>
+                <View style={styles.progressTrack}>
+                  <View style={[styles.progressFill, { width: `${item.percent}%` }]} />
+                </View>
+                <View style={styles.cardFooter}>
+                  <TouchableOpacity onPress={() => router.push('/donation' as any)}>
+                    <Text style={styles.readMore}>Read More</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.donateBtn}
+                    onPress={() => router.push('/payment' as any)} // Added Navigation
+                  >
+                    <Text style={styles.donateBtnText}>Donate</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
+        />
+
+        <View style={[styles.sectionTitleRow, { marginTop: 30 }]}>
+          <Text style={styles.sectionTitle}>NEEDS SOME LOVE</Text>
           <View style={styles.countBadge}><Text style={styles.countText}>2</Text></View>
         </View>
-        <Text style={styles.sectionSubLabel}>Fundraising goals with low progress, help show them some support!</Text>
-        
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={width * 0.75 + 20} decelerationRate="fast" contentContainerStyle={styles.horizontalScroll}>
-          <CampaignCard 
-            tag="Health" 
-            title="Community Clean Water Project Sitio Bagong Silang" 
-            raised="1620" goal="9000" percent="18" 
-            image="https://images.unsplash.com/photo-1541516166103-3ad24017393a" 
-          />
-          <CampaignCard 
-            tag="Children" 
-            title="School Supplies for Remote Schools" 
-            raised="500" goal="5000" percent="10" 
-            image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b" 
-          />
-        </ScrollView>
+        <Text style={styles.sectionSubtitle}>Fundraising goals with low progress, help show them some support!</Text>
       </ScrollView>
     </View>
   );
@@ -98,37 +139,39 @@ export default function ExploreScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
-  topNav: { backgroundColor: '#1A2138', height: 100, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
-  topNavTitle: { color: 'white', fontSize: 20, fontWeight: 'bold' },
-  headerSection: { padding: 20 },
-  mainTitle: { fontSize: 24, fontWeight: 'bold', color: '#000' },
-  subTitle: { fontSize: 14, color: '#666', marginTop: 8, lineHeight: 20 },
-  
-  // Categories
-  categoryBar: { paddingLeft: 20, marginVertical: 10 },
-  catBtn: { backgroundColor: '#1A2138', paddingHorizontal: 20, paddingVertical: 8, borderRadius: 10, marginRight: 10, height: 40 },
-  catBtnActive: { backgroundColor: '#1A2138' },
-  catText: { color: '#FFF', fontWeight: '500' },
-
-  // Cards
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginTop: 25 },
-  sectionLabel: { fontSize: 13, fontWeight: 'bold', letterSpacing: 1 },
-  sectionSubLabel: { fontSize: 13, color: '#888', paddingHorizontal: 20, marginTop: 5, marginBottom: 15 },
-  countBadge: { backgroundColor: '#1A2138', borderRadius: 10, width: 22, height: 22, justifyContent: 'center', alignItems: 'center', marginLeft: 8 },
-  countText: { color: 'white', fontSize: 12, fontWeight: 'bold' },
-  horizontalScroll: { paddingLeft: 20, paddingBottom: 10 },
-  card: { width: width * 0.75, marginRight: 15, borderRadius: 15, backgroundColor: 'white', borderWidth: 1, borderColor: '#eee', overflow: 'hidden' },
-  cardImage: { width: '100%', height: 150 },
-  cardContent: { padding: 12 },
-  tag: { backgroundColor: '#1A2138', alignSelf: 'flex-start', paddingVertical: 2, paddingHorizontal: 8, borderRadius: 5, marginBottom: 8 },
-  tagText: { color: 'white', fontSize: 10 },
-  cardTitle: { fontWeight: 'bold', fontSize: 15, height: 40 },
-  progressLabel: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-  progressText: { fontSize: 11, color: '#888' },
-  progressBar: { height: 6, backgroundColor: '#eee', borderRadius: 3, marginVertical: 8 },
+  scrollPadding: { paddingTop: 60, paddingBottom: 120 },
+  headerSection: { paddingHorizontal: 20 },
+  mainHeading: { fontSize: 26, fontWeight: '800', color: '#000', marginBottom: 8 },
+  subHeading: { fontSize: 15, color: '#666', lineHeight: 22, width: '90%' },
+  categoryScrollWrapper: { marginTop: 25, height: 45 },
+  categoryContent: { paddingHorizontal: 20 },
+  categoryPill: { backgroundColor: '#F0F2F5', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, marginRight: 10 },
+  categoryPillActive: { backgroundColor: '#1A2138' },
+  categoryLabel: { color: '#1A2138', fontWeight: '600', fontSize: 14 },
+  categoryLabelActive: { color: '#FFF' },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginTop: 30 },
+  sectionTitle: { fontSize: 13, fontWeight: '900', color: '#1A2138', letterSpacing: 0.5 },
+  countBadge: { backgroundColor: '#1A2138', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', marginLeft: 8 },
+  countText: { color: 'white', fontSize: 11, fontWeight: 'bold' },
+  sectionSubtitle: { paddingHorizontal: 20, fontSize: 14, color: '#888', marginTop: 5, lineHeight: 20 },
+  cardList: { paddingLeft: 20, marginTop: 20 },
+  card: { width: width * 0.8, backgroundColor: '#FFF', borderRadius: 20, marginRight: 15, borderWidth: 1, borderColor: '#EEE', overflow: 'hidden' },
+  imageWrapper: { height: 180, position: 'relative' },
+  cardImage: { width: '100%', height: '100%' },
+  urgentBadge: { position: 'absolute', top: 15, left: 15, backgroundColor: '#FF5A5F', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  urgentText: { color: 'white', fontSize: 10, fontWeight: 'bold' },
+  imageOverlayText: { position: 'absolute', bottom: 15, left: 15, right: 15 },
+  overlayTitle: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  cardInfo: { padding: 15 },
+  categoryBadge: { backgroundColor: '#1A2138', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 5, marginBottom: 10 },
+  badgeText: { color: 'white', fontSize: 10, fontWeight: 'bold' },
+  progressRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  progressText: { fontSize: 12, color: '#666' },
+  percentText: { fontSize: 12, color: '#999' },
+  progressTrack: { height: 6, backgroundColor: '#F0F0F0', borderRadius: 3, marginVertical: 10 },
   progressFill: { height: '100%', backgroundColor: '#1A2138', borderRadius: 3 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 5 },
-  readMoreText: { fontSize: 12, color: '#888', textDecorationLine: 'underline' },
-  donateBtn: { backgroundColor: '#FF9F43', paddingHorizontal: 20, paddingVertical: 8, borderRadius: 10 },
-  donateBtnText: { color: 'white', fontWeight: 'bold', fontSize: 13 },
+  readMore: { fontSize: 13, color: '#888', textDecorationLine: 'underline' },
+  donateBtn: { backgroundColor: '#FF9F43', paddingHorizontal: 25, paddingVertical: 10, borderRadius: 12 },
+  donateBtnText: { color: 'white', fontWeight: 'bold', fontSize: 14 }
 });

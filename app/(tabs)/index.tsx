@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router'; // 1. Import useRouter
 
 const { width } = Dimensions.get('window');
 
-const FeaturedCard = () => (
+// 2. Pass navigate function to FeaturedCard
+const FeaturedCard = ({ onDonate }: { onDonate: () => void }) => (
   <View style={styles.card}>
     <Image source={{ uri: 'https://images.unsplash.com/photo-1548191265-cc70d3d45ba1' }} style={styles.cardImage} />
     <View style={styles.cardContent}>
@@ -17,13 +19,26 @@ const FeaturedCard = () => (
       <View style={styles.progressBar}><View style={[styles.progressFill, { width: '40%' }]} /></View>
       <View style={styles.cardFooter}>
         <Text style={styles.readMore}>Read More</Text>
-        <TouchableOpacity style={styles.donateBtn}><Text style={styles.donateBtnText}>Donate</Text></TouchableOpacity>
+        {/* 3. Add onPress here */}
+        <TouchableOpacity 
+          style={styles.donateBtn} 
+          onPress={onDonate}
+        >
+          <Text style={styles.donateBtnText}>Donate</Text>
+        </TouchableOpacity>
       </View>
     </View>
   </View>
 );
 
 export default function Home() {
+  const router = useRouter(); // 4. Initialize router
+
+  // Helper function to navigate
+  const handleDonatePress = () => {
+    router.push('/payment' as any); // Use 'as any' to avoid the TS error we discussed
+  };
+
   return (
     <View style={styles.mainWrapper}>
       <View style={styles.topNav}><Text style={styles.topNavTitle}>Fundr</Text></View>
@@ -40,8 +55,9 @@ export default function Home() {
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={width * 0.8 + 20} decelerationRate="fast" contentContainerStyle={{ paddingHorizontal: 20 }}>
-          <FeaturedCard />
-          <FeaturedCard />
+          {/* 5. Pass the function to the cards */}
+          <FeaturedCard onDonate={handleDonatePress} />
+          <FeaturedCard onDonate={handleDonatePress} />
         </ScrollView>
 
         <View style={styles.banner}>
@@ -53,15 +69,27 @@ export default function Home() {
         </View>
 
         <View style={styles.exploreBar}>
-           <Text style={styles.sectionTitle}>NOT SURE WHERE TO HELP?</Text>
-           <TouchableOpacity style={styles.miniExplore}><Text>Explore</Text></TouchableOpacity>
+            <Text style={styles.sectionTitle}>NOT SURE WHERE TO HELP?</Text>
+            {/* 6. Navigate to Explore Tab */}
+            <TouchableOpacity 
+               style={styles.miniExplore} 
+               onPress={() => router.push('/explore' as any)}
+            >
+              <Text>Explore</Text>
+            </TouchableOpacity>
         </View>
 
         <View style={styles.largeCard}>
           <Image source={{ uri: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c' }} style={styles.largeCardImg} />
           <View style={styles.largeCardOverlay}>
             <Text style={styles.largeCardTitle}>Support Families and Communities in Need</Text>
-            <TouchableOpacity style={styles.largeDonate}><Text style={styles.donateBtnText}>Donate</Text></TouchableOpacity>
+            {/* 7. Add onPress to Large Card */}
+            <TouchableOpacity 
+              style={styles.largeDonate} 
+              onPress={handleDonatePress}
+            >
+              <Text style={styles.donateBtnText}>Donate</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -74,7 +102,6 @@ export default function Home() {
           </View>
         </View>
 
-        {/* BOTTOM PADDING SO CONTENT ISN'T BEHIND TAB BAR */}
         <View style={{ height: 120 }} />
       </ScrollView>
     </View>
@@ -84,7 +111,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   mainWrapper: { flex: 1, backgroundColor: '#FFF' },
   topNav: { backgroundColor: '#1A2138', height: 100, justifyContent: 'center', alignItems: 'center', paddingTop: 40 },
-  topNavTitle: { color: 'white', fontSize: 20, fontWeight: 'bold' },
+  topNavTitle: { color: 'white', fontSize: 30, fontWeight: 'bold' },
   header: { backgroundColor: '#F9F1D0', padding: 25 },
   greeting: { fontSize: 28, fontWeight: 'bold' },
   subGreeting: { fontSize: 14, color: '#666', marginTop: 5 },
