@@ -5,47 +5,56 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 
 export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activePill]}>
-              <Ionicons name="home" size={22} color={focused ? '#1A2138' : '#999'} />
-              {focused && <Text style={styles.tabText}>Home</Text>}
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activePill]}>
-              <Ionicons name="compass-outline" size={24} color={focused ? '#1A2138' : '#999'} />
-              {focused && <Text style={styles.tabText}>Explore</Text>}
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activePill]}>
-              <Ionicons name={focused ? "person" : "person-outline"} size={24} color={focused ? '#1A2138' : '#999'} />
-              {focused && <Text style={styles.tabText}>Profile</Text>}
-            </View>
-          ),
-        }}
-      />
-    </Tabs>
+   <Tabs
+  screenOptions={{
+    headerShown: false,
+    tabBarShowLabel: false,
+    tabBarStyle: {
+      position: 'absolute',
+      bottom: 20,
+      left: 20,
+      right: 20,
+      height: 70,
+      borderRadius: 35,
+      backgroundColor: '#ffffff',
+      elevation: 20,
+      borderTopWidth: 0,
+    },
+    tabBarItemStyle: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    tabBarActiveTintColor: '#1A2138',
+    tabBarInactiveTintColor: '#999',
+  }}
+>
+  <Tabs.Screen
+    name="index"
+    options={{
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons name="home" size={28} color={color} />
+      ),
+    }}
+  />
+  <Tabs.Screen
+    name="explore"
+    options={{
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons name="compass-outline" size={28} color={color} />
+      ),
+    }}
+  />
+  <Tabs.Screen
+    name="profile"
+    options={{
+      tabBarIcon: ({ color, size }) => (
+        <Ionicons name="person-outline" size={28} color={color} />
+      ),
+    }}
+  />
+</Tabs>
+
   );
 }
 
@@ -58,13 +67,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 35,
     height: 70,
-    elevation: 10,
-    shadowColor: '#000',
+    elevation: 10, // Android shadow
+    shadowColor: '#000', // iOS shadow
     shadowOpacity: 0.1,
     shadowRadius: 10,
     borderTopWidth: 0,
-    zIndex: 1000,
   },
+
+  tabItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   iconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -72,10 +87,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 20,
+    width: '100%',
   },
+
   activePill: {
-    backgroundColor: 'rgba(231, 179, 83, 0.3)', // 30% Gold Pill
+    backgroundColor: 'rgba(231, 179, 83, 0.3)', // 30% gold pill
   },
+
   tabText: {
     color: '#1A2138',
     fontWeight: 'bold',
