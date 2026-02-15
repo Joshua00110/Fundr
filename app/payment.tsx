@@ -6,7 +6,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { auth, db } from './firebase'; 
-import { doc, updateDoc, increment, arrayUnion } from 'firebase/firestore';
+import { doc, updateDoc, increment, arrayUnion, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 
 export default function PaymentScreen() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export default function PaymentScreen() {
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  
+  // --- ADDED: Category State ---
+  const [selectedCategory, setSelectedCategory] = useState('Education');
+  const categories = ['Education', 'Health', 'Environment', 'Food'];
 
   // 1. Open Wallet Selection
   const validateAndOpenWallets = () => {
@@ -45,19 +50,34 @@ export default function PaymentScreen() {
       try {
         const user = auth.currentUser;
         if (user) {
+          const donationAmount = parseFloat(amount);
           const userRef = doc(db, "users", user.uid);
+
+          // UPDATE: Records the specific category in user history
           await updateDoc(userRef, {
-            totalDonated: increment(parseFloat(amount)),
+            totalDonated: increment(donationAmount),
             donationHistory: arrayUnion({
-              amount: parseFloat(amount),
+              amount: donationAmount,
               method: selectedWallet,
+              category: selectedCategory, // Added category here
               date: new Date().toISOString(),
             })
           });
 
+          // ADDED: Create a separate transaction record for the Admin Panel
+          await addDoc(collection(db, "transactions"), {
+            donorEmail: user.email,
+            donorUid: user.uid,
+            amount: donationAmount,
+            category: selectedCategory,
+            method: selectedWallet,
+            status: "completed",
+            timestamp: serverTimestamp()
+          });
+
           setIsVerifying(false);
           setShowQRModal(false);
-          Alert.alert("Success!", "Payment Received. Thank you for your donation!", [{ text: "Done", onPress: () => router.back() }]);
+          Alert.alert("Success!", `₱${amount} received for ${selectedCategory}. Thank you!`, [{ text: "Done", onPress: () => router.back() }]);
         }
       } catch (error) {
         setIsVerifying(false);
@@ -73,6 +93,22 @@ export default function PaymentScreen() {
           <TouchableOpacity onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color="black" /></TouchableOpacity>
           <Text style={styles.headerTitle}>Donation</Text>
           <View style={{ width: 24 }} />
+        </View>
+
+        {/* --- ADDED: Category Selection --- */}
+        <View style={styles.categorySection}>
+          <Text style={styles.sectionLabel}>Select Cause</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+            {categories.map((cat) => (
+              <TouchableOpacity 
+                key={cat} 
+                style={[styles.categoryTab, selectedCategory === cat && styles.categoryTabActive]}
+                onPress={() => setSelectedCategory(cat)}
+              >
+                <Text style={[styles.categoryTabText, selectedCategory === cat && styles.categoryTabTextActive]}>{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
         <View style={styles.card}>
@@ -108,14 +144,14 @@ export default function PaymentScreen() {
           <Text style={styles.qrAmount}>₱{amount}</Text>
           
           <View style={styles.qrPlaceholder}>
-             {/* You can replace this Image with your actual GCash/Maya QR code URI */}
              <Image 
                 source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=FundrDonation' }} 
                 style={styles.qrImage} 
              />
           </View>
 
-          <Text style={styles.qrInstruction}>Please scan the QR code above and complete the payment in your {selectedWallet} app.</Text>
+          <Text style={styles.qrInstruction}>Payment for: <Text style={{fontWeight:'bold'}}>{selectedCategory}</Text></Text>
+          <Text style={styles.qrInstructionSub}>Please scan the QR code above and complete the payment in your {selectedWallet} app.</Text>
 
           <TouchableOpacity 
             style={styles.confirmBtn} 
@@ -139,13 +175,22 @@ const styles = StyleSheet.create({
   content: { padding: 20 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
   headerTitle: { fontSize: 20, fontWeight: 'bold' },
+  
+  // Added Styles for Categories
+  categorySection: { marginBottom: 25 },
+  sectionLabel: { fontSize: 14, fontWeight: 'bold', color: '#888', marginBottom: 10, marginLeft: 5 },
+  categoryScroll: { flexDirection: 'row' },
+  categoryTab: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, backgroundColor: '#eee', marginRight: 10 },
+  categoryTabActive: { backgroundColor: '#2d3737' },
+  categoryTabText: { color: '#666', fontWeight: '600' },
+  categoryTabTextActive: { color: '#fff' },
+
   card: { backgroundColor: 'white', padding: 25, borderRadius: 20, elevation: 4, marginBottom: 25 },
   label: { fontSize: 14, color: '#888', marginBottom: 5 },
   input: { fontSize: 36, fontWeight: 'bold', color: '#2d3737' },
   payButton: { backgroundColor: '#2d3737', padding: 20, borderRadius: 15, alignItems: 'center' },
   payButtonText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
 
-  // Wallet Selection
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   bottomSheet: { backgroundColor: 'white', padding: 25, borderTopLeftRadius: 30, borderTopRightRadius: 30 },
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 20 },
@@ -154,13 +199,13 @@ const styles = StyleSheet.create({
   walletText: { fontSize: 16, fontWeight: '600' },
   closeBtn: { marginTop: 10, alignItems: 'center', padding: 10 },
 
-  // QR Modal
   qrContainer: { flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', padding: 30 },
   qrTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 5 },
   qrAmount: { fontSize: 32, fontWeight: '900', color: '#2d3737', marginBottom: 30 },
   qrPlaceholder: { padding: 20, backgroundColor: '#F8F9FA', borderRadius: 20, marginBottom: 30 },
   qrImage: { width: 250, height: 250 },
-  qrInstruction: { textAlign: 'center', color: '#666', marginBottom: 40, lineHeight: 20 },
+  qrInstruction: { textAlign: 'center', color: '#2d3737', fontSize: 16, marginBottom: 5 },
+  qrInstructionSub: { textAlign: 'center', color: '#666', marginBottom: 40, lineHeight: 20 },
   confirmBtn: { backgroundColor: '#2d3737', width: '100%', padding: 20, borderRadius: 15, alignItems: 'center' },
   confirmBtnText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
   backLink: { marginTop: 20 }
